@@ -2,13 +2,16 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q,F
+from django.db.models.aggregates import Count,Min,Max,Avg,Sum
 from store.models import Product,OrderItem,Order
 
 
 
 
 def say_hello(request):
-    query_set = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5] # returns a list of orders with their customer data in a single query
+    result = Product.objects.aggregate(count=Count('id'),min_price=Min('unit_price'),max_price=Max('unit_price'),avg_price=Avg('unit_price'),sum_price=Sum('unit_price'))
+    
+    #query_set = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5] # returns a list of orders with their customer data in a single query
 
     #query_set = OrderItem.objects.values('product_id').distinct() # returns a list of dictionaries with product_id of order items
     #query_set = Product.objects.prefetch_related('promotions').select_related('collection').all() # returns a list of products with their promotions data in a single query
@@ -36,4 +39,4 @@ def say_hello(request):
 
     
 
-    return render(request,'hello.html',{'name':'Taha Waheed','orders':list(query_set)})
+    return render(request,'hello.html',{'name':'Taha Waheed','result':result})
