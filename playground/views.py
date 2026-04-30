@@ -16,11 +16,15 @@ def say_hello(request):
 
     # query_set = Customer.objects.annotate(
     #    full_name=Func(F('first_name'),Value(' '),F('last_name'),function='CONCAT')) // Using Func
-    
+
+    # query_set = Customer.objects.annotate(
+    #   full_name = Concat('first_name',Value(' '),'last_name')  
+    # )
+
     query_set = Customer.objects.annotate(
-      full_name = Concat('first_name',Value(' '),'last_name')  
-    )
+      orders_count = Count('order'))  
     
+
     #result = Product.objects.aggregate(count=Count('id'),min_price=Min('unit_price'),max_price=Max('unit_price'),avg_price=Avg('unit_price'),sum_price=Sum('unit_price'))
     
     #query_set = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5] # returns a list of orders with their customer data in a single query
