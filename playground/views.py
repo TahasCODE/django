@@ -3,7 +3,8 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q,F
 from django.db.models.aggregates import Count,Min,Max,Avg,Sum
-from django.db.models import Value
+from django.db.models import Value,Func
+from django.db.models.functions import Concat
 from store.models import Product,OrderItem,Order,Customer
 
 
@@ -12,7 +13,14 @@ from store.models import Product,OrderItem,Order,Customer
 def say_hello(request):
     
     #query_set = Customer.objects.annotate(is_new=Value(True))
-    query_set = Customer.objects.annotate(new_id=F('id')+1000)
+
+    # query_set = Customer.objects.annotate(
+    #    full_name=Func(F('first_name'),Value(' '),F('last_name'),function='CONCAT')) // Using Func
+    
+    query_set = Customer.objects.annotate(
+      full_name = Concat('first_name',Value(' '),'last_name')  
+    )
+    
     #result = Product.objects.aggregate(count=Count('id'),min_price=Min('unit_price'),max_price=Max('unit_price'),avg_price=Avg('unit_price'),sum_price=Sum('unit_price'))
     
     #query_set = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5] # returns a list of orders with their customer data in a single query
