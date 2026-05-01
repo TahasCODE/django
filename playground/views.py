@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q,F
+from django.db.models import Q,F, DecimalField
 from django.db.models.aggregates import Count,Min,Max,Avg,Sum
-from django.db.models import Value,Func
+from django.db.models import Value,Func,ExpressionWrapper
 from django.db.models.functions import Concat
 from store.models import Product,OrderItem,Order,Customer
 
@@ -21,8 +21,14 @@ def say_hello(request):
     #   full_name = Concat('first_name',Value(' '),'last_name')  
     # )
 
-    query_set = Customer.objects.annotate(
-      orders_count = Count('order'))  
+    discounted_price = ExpressionWrapper(F('unit_price')*0.8,output_field=DecimalField())
+   
+    query_set = Product.objects.annotate(
+       discounted_price=discounted_price)
+
+
+    # query_set = Customer.objects.annotate(
+    #   orders_count = Count('order'))  
     
 
     #result = Product.objects.aggregate(count=Count('id'),min_price=Min('unit_price'),max_price=Max('unit_price'),avg_price=Avg('unit_price'),sum_price=Sum('unit_price'))
