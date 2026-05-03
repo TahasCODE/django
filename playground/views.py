@@ -5,12 +5,17 @@ from django.db.models import Q,F, DecimalField
 from django.db.models.aggregates import Count,Min,Max,Avg,Sum
 from django.db.models import Value,Func,ExpressionWrapper
 from django.db.models.functions import Concat
+from django.contrib.contenttypes.models import ContentType
 from store.models import Product,OrderItem,Order,Customer
-
+from tags.models import TaggedItem
 
 
 
 def say_hello(request):
+
+    content_type = ContentType.objects.get_for_model(Product)
+    query_set = TaggedItem.objects.select_related('tag').filter(
+        content_type=content_type, object_id=1)
     
     #query_set = Customer.objects.annotate(is_new=Value(True))
 
@@ -21,10 +26,10 @@ def say_hello(request):
     #   full_name = Concat('first_name',Value(' '),'last_name')  
     # )
 
-    discounted_price = ExpressionWrapper(F('unit_price')*0.8,output_field=DecimalField())
+    # discounted_price = ExpressionWrapper(F('unit_price')*0.8,output_field=DecimalField())
    
-    query_set = Product.objects.annotate(
-       discounted_price=discounted_price)
+    # query_set = Product.objects.annotate(
+    #    discounted_price=discounted_price)
 
 
     # query_set = Customer.objects.annotate(
@@ -40,7 +45,7 @@ def say_hello(request):
     #query_set = Product.objects.select_related('collection').all() # returns a list of products with their collection data in a single query
     #query_set = Product.objects.filter(id__in=OrderItem.objects.values('product_id').distinct()).order_by('title') # returns a list of products that are in order items
     #query_set = Product.objects.only('id','title')
-     #query_set = Product.objects.defer('description')
+    #query_set = Product.objects.defer('description')
     # query_set = Product.objects.filter(Q(inventory__lt=10) | Q(unit_price__lt=20))
     # query_set = Product.objects.filter(inventory=F('collection__id'))
     # query_set = Product.objects.order_by('unit_price','title')
@@ -52,13 +57,10 @@ def say_hello(request):
     # product = Product.objects.earliest('unit_price') # returns the first product with the lowest unit price
     # product = Product.objects.latest('unit_price') # returns the first product with the highest
 
-    
     # query_set = Product.objects.order_by('-title')
     # query_set = Product.objects.filter(Q(inventory__lt=10) & ~Q(unit_price__lt=20)) means inventory less than 10 and unit price greater than or equal to 20
     # returns None if not found
     # exists = Product.objects.filter(pk=0).exists() # returns True or False
    
 
-    
-
-    return render(request,'hello.html',{'name':'Taha Waheed','result':list(query_set)})
+    return render(request,'hello.html',{'name':'Taha Waheed','tags': list(query_set)})
